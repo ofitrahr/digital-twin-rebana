@@ -1,0 +1,154 @@
+{
+ "metode": "Skenario lanskap Rebana 2030 untuk 'Rebana Landscape Twin' v2.\n\nMetode (sederhana & transparan, grid 100 m = 1 ha/sel):\n1. Permintaan lahan terbangun baru per kab/kota 2022-2030 = laju konversi ke lahan\n   terbangun 2014-2022 (lapisan perubahan LULC Bappeda), diekstrapolasi linear 8 tahun.\n2. Alokasi spasial per kab/kota: sel kandidat diurutkan berdasarkan skor kesesuaian\n   (kedekatan ke lahan terbangun eksisting, kedekatan ke hotspot konversi 2014-2022,\n   kelerengan landai) lalu dipilih sebanyak permintaan.\n3. Tiga skenario membedakan sel yang boleh dikonversi:\n   - BAU        : semua kelas non-air/non-terbangun (hutan diberi bobot rendah).\n   - LP2B       : sawah & hutan dilindungi, kecuali sawah di dalam Kawasan Peruntukan\n                  Industri (KPI) RTRW; KPI diberi bonus skor.\n   - PESISIR    : seperti LP2B + larangan membangun di zona genangan +1 m; tambak di\n                  zona tersebut ditandai sebagai kandidat restorasi mangrove.\nKeluaran: GeoJSON per skenario, KPI, statistik (JSON) dan grid ringkas untuk slide.",
+ "baseline_2022": {
+  "terbangun_ha": 111018,
+  "sawah_ha": 434614,
+  "hutan_ha": 112370,
+  "kpi_ha": 51898,
+  "kpi_sawah_ha": 30850,
+  "terbangun_terpapar_1m_ha": 413,
+  "terbangun_terpapar_2m_ha": 1473,
+  "kpi_di_genangan1m_ha": 7471,
+  "kpi_di_genangan2m_ha": 11283,
+  "kandidat_mangrove_ha": 23385
+ },
+ "permintaan_per_kab_ha": {
+  "Kuningan": 1599,
+  "Cirebon": 4791,
+  "Indramayu": 567,
+  "Kota Cirebon": 386,
+  "Majalengka": 3072,
+  "Subang": 1152,
+  "Sumedang": 1510
+ },
+ "skenario": {
+  "bau": {
+   "terbangun_baru_ha": 13077,
+   "sawah_hilang_ha": 9711,
+   "hutan_hilang_ha": 0,
+   "baru_di_kpi_ha": 4281,
+   "baru_di_genangan1m_ha": 283,
+   "terbangun_total_ha": 124095,
+   "terbangun_terpapar_1m_ha": 696,
+   "terbangun_terpapar_2m_ha": 2189,
+   "sawah_2030_ha": 424903,
+   "tidak_teralokasi_ha": 0
+  },
+  "lp2b": {
+   "terbangun_baru_ha": 13077,
+   "sawah_hilang_ha": 5069,
+   "hutan_hilang_ha": 0,
+   "baru_di_kpi_ha": 7162,
+   "baru_di_genangan1m_ha": 464,
+   "terbangun_total_ha": 124095,
+   "terbangun_terpapar_1m_ha": 877,
+   "terbangun_terpapar_2m_ha": 2665,
+   "sawah_2030_ha": 429545,
+   "tidak_teralokasi_ha": 0
+  },
+  "pesisir": {
+   "terbangun_baru_ha": 13077,
+   "sawah_hilang_ha": 5344,
+   "hutan_hilang_ha": 0,
+   "baru_di_kpi_ha": 7156,
+   "baru_di_genangan1m_ha": 0,
+   "terbangun_total_ha": 124095,
+   "terbangun_terpapar_1m_ha": 413,
+   "terbangun_terpapar_2m_ha": 2284,
+   "sawah_2030_ha": 429270,
+   "tidak_teralokasi_ha": 0
+  }
+ },
+ "per_kab": {
+  "bau": {
+   "Kuningan": {
+    "baru_ha": 1599,
+    "sawah_hilang_ha": 1029
+   },
+   "Cirebon": {
+    "baru_ha": 4791,
+    "sawah_hilang_ha": 3822
+   },
+   "Indramayu": {
+    "baru_ha": 567,
+    "sawah_hilang_ha": 323
+   },
+   "Kota Cirebon": {
+    "baru_ha": 386,
+    "sawah_hilang_ha": 168
+   },
+   "Majalengka": {
+    "baru_ha": 3072,
+    "sawah_hilang_ha": 2377
+   },
+   "Subang": {
+    "baru_ha": 1152,
+    "sawah_hilang_ha": 1008
+   },
+   "Sumedang": {
+    "baru_ha": 1510,
+    "sawah_hilang_ha": 984
+   }
+  },
+  "lp2b": {
+   "Kuningan": {
+    "baru_ha": 1599,
+    "sawah_hilang_ha": 64
+   },
+   "Cirebon": {
+    "baru_ha": 4791,
+    "sawah_hilang_ha": 3671
+   },
+   "Indramayu": {
+    "baru_ha": 567,
+    "sawah_hilang_ha": 323
+   },
+   "Kota Cirebon": {
+    "baru_ha": 386,
+    "sawah_hilang_ha": 0
+   },
+   "Majalengka": {
+    "baru_ha": 3072,
+    "sawah_hilang_ha": 3
+   },
+   "Subang": {
+    "baru_ha": 1152,
+    "sawah_hilang_ha": 1008
+   },
+   "Sumedang": {
+    "baru_ha": 1510,
+    "sawah_hilang_ha": 0
+   }
+  },
+  "pesisir": {
+   "Kuningan": {
+    "baru_ha": 1599,
+    "sawah_hilang_ha": 64
+   },
+   "Cirebon": {
+    "baru_ha": 4791,
+    "sawah_hilang_ha": 3953
+   },
+   "Indramayu": {
+    "baru_ha": 567,
+    "sawah_hilang_ha": 316
+   },
+   "Kota Cirebon": {
+    "baru_ha": 386,
+    "sawah_hilang_ha": 0
+   },
+   "Majalengka": {
+    "baru_ha": 3072,
+    "sawah_hilang_ha": 3
+   },
+   "Subang": {
+    "baru_ha": 1152,
+    "sawah_hilang_ha": 1008
+   },
+   "Sumedang": {
+    "baru_ha": 1510,
+    "sawah_hilang_ha": 0
+   }
+  }
+ }
+}

@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rebana Landscape Twin</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Cpath d=%22M1 11 5 6l3 3 3-5 4 7z%22 fill=%22%23793c34%22/%3E%3C/svg%3E">
+<meta name="description" content="Prototipe digital twin lanskap Kawasan Metropolitan Rebana: tutupan lahan 3D, perubahan 2014–2022, skenario 2030, dan simulasi genangan pesisir. Open source.">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#d2c6b3; --card:#f2ece1; --ink:#0d0b08; --muted:#5b5245; --brick:#793c34; --rule:#b9ab94;
+    --new-sawah:#8e1b5a; --new-other:#c77da0; --built:#c8553d; --kpi:#4b3f9e; --mangrove:#1e7f5c; --flood:#1fa3d6;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--paper);color:var(--ink);font:14px/1.45 Inter,system-ui,sans-serif}
+  #map{position:absolute;inset:0}
+  .panel{position:absolute;top:16px;left:16px;bottom:16px;width:380px;background:var(--card);border-top:3px solid var(--brick);
+    box-shadow:0 10px 40px rgba(0,0,0,.18);display:flex;flex-direction:column;z-index:2}
+  .head{padding:18px 20px 10px}
+  .kick{font:600 11px Inter;letter-spacing:.14em;text-transform:uppercase;color:var(--brick)}
+  h1{font:300 32px/1.02 Fraunces,serif;margin:4px 0 6px}
+  .sub{color:var(--muted);font-size:13px}
+  .tabs{display:flex;border-bottom:1px solid var(--rule);padding:0 12px}
+  .tabs button{flex:1;background:none;border:0;padding:10px 4px;font:600 12px Inter;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
+  .tabs button.on{color:var(--ink);border-color:var(--ink)}
+  .body{overflow:auto;padding:14px 20px 20px;flex:1}
+  .tab{display:none}.tab.on{display:block}
+  h2{font:600 11px Inter;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+  h2:first-child{margin-top:4px}
+  .seg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .seg button{padding:9px 8px;border:1px solid #8b7f6c;background:transparent;font:600 12.5px Inter;cursor:pointer;text-align:left;color:var(--ink)}
+  .seg button small{display:block;font-weight:400;color:var(--muted);font-size:11px}
+  .seg button.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+  .seg button.on small{color:#d8cfbf}
+  .desc{margin:10px 0 0;font-size:13px;color:#2b2620}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+  .card{background:#fbf8f2;border:1px solid #e2d8c6;padding:10px}
+  .card b{display:block;font:500 24px Fraunces,serif;letter-spacing:-.01em}
+  .card span{font-size:11.5px;color:var(--muted)}
+  .bars .row{display:grid;grid-template-columns:96px 1fr 62px;align-items:center;gap:8px;margin:5px 0;font-size:12px}
+  .bars .track{height:12px;background:#e6dccb;position:relative}
+  .bars .fill{position:absolute;inset:0 auto 0 0;background:var(--brick)}
+  .bars .row.on .fill{background:var(--new-sawah)}
+  .bars .row.on{font-weight:600}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  td,th{padding:4px 2px;border-bottom:1px solid #e2d8c6;text-align:right}
+  td:first-child,th:first-child{text-align:left}
+  th{font-weight:600;color:var(--muted);font-size:11px}
+  label.tg{display:flex;align-items:center;gap:9px;margin:7px 0;cursor:pointer;font-size:13px}
+  .sw{width:14px;height:14px;display:inline-block;flex:none;border:1px solid rgba(0,0,0,.15)}
+  .flood{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+  .flood button{padding:7px 0;border:1px solid #8b7f6c;background:transparent;font:600 12px Inter;cursor:pointer}
+  .flood button.on{background:var(--flood);border-color:var(--flood);color:#fff}
+  select{width:100%;padding:8px;border:1px solid #8b7f6c;background:#fbf8f2;font:13px Inter}
+  .note{font-size:11.5px;color:var(--muted);margin-top:10px}
+  .about p{margin:0 0 10px;font-size:13px}
+  .about ul{padding-left:18px;margin:0 0 10px;font-size:13px}
+  .foot{padding:10px 20px;border-top:1px solid var(--rule);font-size:11px;color:var(--muted)}
+  .legend{position:absolute;right:16px;bottom:64px;background:rgba(242,236,225,.95);padding:10px 12px;font-size:12px;z-index:2;max-width:240px;box-shadow:0 6px 24px rgba(0,0,0,.15)}
+  .legend div{display:flex;align-items:center;gap:7px;margin:3px 0}
+  .legend .lh{cursor:pointer;font:600 11px Inter;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:4px}
+  .legend.min .lb{display:none}
+  .legend b{font:600 10.5px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .maplibregl-popup-content{font:13px Inter;border-radius:0;padding:12px 14px}
+  .pop h3{font:500 18px Fraunces,serif;margin:0 0 6px}
+  .pop td{padding:2px 0}
+  .toggle{display:none}
+  @media (max-width:760px){
+    .panel{top:auto;left:0;right:0;bottom:0;width:auto;height:52vh;border-top-width:3px}
+    .panel.min{height:118px}
+    .toggle{display:block;position:absolute;right:14px;top:14px;border:1px solid #8b7f6c;background:transparent;font:600 12px Inter;padding:6px 10px}
+    .legend{top:12px;bottom:auto;left:12px;right:auto;max-width:210px;font-size:11px;max-height:40vh;overflow:auto}
+    h1{font-size:26px}
+  }
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<aside class="panel" id="panel">
+  <button class="toggle" id="toggle">Ciutkan</button>
+  <div class="head">
+    <div class="kick">Prototipe riset · Open source</div>
+    <h1>Rebana Landscape Twin</h1>
+    <div class="sub">Digital twin lanskap Kawasan Metropolitan Rebana, Jawa Barat</div>
+  </div>
+  <nav class="tabs">
+    <button data-tab="scn" class="on">Skenario 2030</button>
+    <button data-tab="lyr">Lapisan</button>
+    <button data-tab="about">Tentang</button>
+  </nav>
+  <div class="body">
+    <section class="tab on" id="tab-scn">
+      <h2>Pilih skenario</h2>
+      <div class="seg" id="scnSeg">
+        <button data-s="base">Kondisi 2022<small>tutupan lahan aktual</small></button>
+        <button data-s="bau">Business as Usual<small>tren 2014–2022 berlanjut</small></button>
+        <button data-s="lp2b">Proteksi LP2B<small>sawah dilindungi, arahkan ke KPI</small></button>
+        <button data-s="pesisir">Pesisir Tangguh<small>LP2B + bebas zona rob +1 m</small></button>
+      </div>
+      <p class="desc" id="scnDesc"></p>
+      <div class="cards" id="cards"></div>
+      <h2>Sawah hilang hingga 2030</h2>
+      <div class="bars" id="bars"></div>
+      <h2>Per kabupaten/kota</h2>
+      <table id="kabTable"></table>
+      <p class="note">Klik wilayah di peta untuk ringkasan per kabupaten/kota.</p>
+    </section>
+
+    <section class="tab" id="tab-lyr">
+      <h2>Fokus wilayah</h2>
+      <select id="kabSel"><option value="">Seluruh Kawasan Rebana</option></select>
+      <h2>Lapisan</h2>
+      <label class="tg"><input type="checkbox" data-l="lulc" checked><span class="sw" style="background:linear-gradient(90deg,#e9d27c 50%,#2f6b3a 50%)"></span>Tutupan lahan 2022 (Bappeda)</label>
+      <label class="tg"><input type="checkbox" data-l="built" checked><span class="sw" style="background:var(--built)"></span>Lahan terbangun 2022 (3D)</label>
+      <label class="tg"><input type="checkbox" data-l="change"><span class="sw" style="background:#e0a526"></span>Perubahan lahan 2014–2022</label>
+      <label class="tg"><input type="checkbox" data-l="kpi"><span class="sw" style="background:var(--kpi)"></span>Kawasan Peruntukan Industri (RTRW)</label>
+      <label class="tg"><input type="checkbox" data-l="mangrove"><span class="sw" style="background:var(--mangrove)"></span>Kandidat restorasi mangrove</label>
+      <label class="tg"><input type="checkbox" id="terrainT" checked><span class="sw" style="background:#9c8f7a"></span>Medan 3D (DEM)</label>
+      <h2>Genangan pesisir (skenario muka air)</h2>
+      <div class="flood" id="floodSeg"><button data-h="0" class="on">0 m</button><button data-h="1">+1 m</button><button data-h="2">+2 m</button><button data-h="3">+3 m</button></div>
+      <p class="note" id="floodNote">Model bathtub terhubung laut, DEM ±30 m. Ilustratif.</p>
+    </section>
+
+    <section class="tab about" id="tab-about">
+      <h2>Tentang platform</h2>
+      <p>Prototipe <i>digital twin</i> lanskap untuk diskusi perencanaan Kawasan Metropolitan Rebana. Dibangun sepenuhnya dengan perangkat lunak open source dan data terbuka/turunan.</p>
+      <h2>Metode skenario 2030</h2>
+      <ul>
+        <li>Permintaan lahan terbangun baru per kab/kota = konversi ke lahan terbangun 2014–2022 (data LULC Bappeda), diekstrapolasi linear 8 tahun (±13,1 ribu ha).</li>
+        <li>Alokasi pada grid 100 m berdasarkan skor kesesuaian: dekat lahan terbangun, dekat hotspot konversi, dan lereng landai.</li>
+        <li><b>BAU</b>: semua lahan non-terbangun boleh dikonversi. <b>Proteksi LP2B</b>: sawah & hutan dilindungi kecuali sawah di dalam KPI. <b>Pesisir Tangguh</b>: LP2B + larangan di zona genangan +1 m.</li>
+      </ul>
+      <h2>Keterbatasan</h2>
+      <ul>
+        <li>Hasil bersifat <b>indikatif</b>; bukan dokumen resmi BP Rebana, Bappeda, atau pemerintah daerah.</li>
+        <li>Data KPI RTRW tersedia untuk 5 dari 7 kab/kota (Majalengka & Sumedang belum termasuk).</li>
+        <li>Genangan: model bathtub di atas DEM Terrarium (SRTM, ±30 m), bukan prediksi banjir.</li>
+      </ul>
+      <h2>Sumber data</h2>
+      <ul>
+        <li>Tutupan lahan 2014 & 2022, perubahan lahan: Bappeda (diolah, disederhanakan)</li>
+        <li>Pola ruang RTRW (Kawasan Peruntukan Industri): RTRW provinsi/kabupaten (diolah)</li>
+        <li>DEM: AWS Terrain Tiles (Terrarium) · Peta dasar: OpenFreeMap / © OpenStreetMap contributors</li>
+      </ul>
+      <h2>Penyusun</h2>
+      <p>Fitrah Ramadhan, M.Sc. · <a href="https://ofitrahramadhan.github.io">ofitrahramadhan.github.io</a></p>
+      <p class="note">Stack: MapLibre GL JS, GeoPandas, Rasterio, SciPy. Lisensi kode: MIT.</p>
+    </section>
+  </div>
+  <div class="foot">Prototipe indikatif untuk diskusi · bukan dokumen resmi</div>
+</aside>
+
+<div class="legend" id="legend"></div>
+<script>if(innerWidth<=760) document.getElementById("legend").classList.add("min");</script>
+
+<script>
+const PAL = {"Sawah":"#E9D27C","Hutan":"#2F6B3A","Kebun/Perkebunan":"#7DAA5F","Ladang/Tegalan":"#CDB27A",
+  "Semak Belukar":"#AFC08F","Terbangun":"#C8553D","Tambak/Empang":"#8CC3D3","Sungai/Danau/Waduk/Situ":"#2B8CC4","Tanah Kosong":"#BDBDBD"};
+const CHG = {"Menjadi lahan terbangun":"#C8553D","Konversi sawah":"#E0A526","Konversi hutan":"#2E9E4F","Perubahan lain":"#8FA3B0"};
+const SCN = {
+  base:{label:"Kondisi 2022", desc:"Tutupan lahan aktual 2022 dari data Bappeda: dasar perbandingan semua skenario."},
+  bau:{label:"Business as Usual", desc:"Laju konversi 2014–2022 berlanjut hingga 2030 tanpa intervensi. Lahan terbangun baru tumbuh di dekat kota dan koridor yang sudah berkembang, termasuk di atas sawah."},
+  lp2b:{label:"Proteksi LP2B", desc:"Sawah dan hutan dilindungi. Pertumbuhan diarahkan ke Kawasan Peruntukan Industri (KPI) RTRW dan lahan non-sawah."},
+  pesisir:{label:"Pesisir Tangguh", desc:"Proteksi LP2B + larangan pembangunan baru di zona genangan +1 m. Tambak di zona rob ditandai sebagai kandidat sabuk mangrove."}
+};
+const FLOOD = {0:0, 1:32027, 2:57142, 3:90904};
+const fmt = n => n.toLocaleString("id-ID");
+const rb = n => (n/1000).toLocaleString("id-ID",{maximumFractionDigits:1}) + " rb ha";
+let STATS, state = {scn: (location.hash.match(/scn=(\w+)/)||[])[1] || "bau", flood:0};
+if(!SCN[state.scn]) state.scn = "bau";
+
+const map = new maplibregl.Map({
+  container:"map", style:"https://tiles.openfreemap.org/styles/positron",
+  center:[108.15,-6.72], zoom:8.9, pitch:50, bearing:-10, maxPitch:75, hash:false, attributionControl:{compact:true}
+});
+map.addControl(new maplibregl.NavigationControl({visualizePitch:true}), "top-right");
+if(innerWidth<=760) map.setPadding({bottom:Math.round(innerHeight*0.45)});
+map.addControl(new maplibregl.ScaleControl({unit:"metric"}), "bottom-right");
+
+const J = f => fetch("data/"+f).then(r=>r.json());
+
+map.on("load", async () => {
+  const [lulc, change, admin, label, kpi, mang, f1, f2, f3, bau, lp2b, pes, stats, bounds] = await Promise.all(
+    ["lulc2022.json","change.json","admin.json","admin_label.json","kpi.json","mangrove.json","flood_1.json","flood_2.json",
+     "flood_3.json","scn_bau.json","scn_lp2b.json","scn_pesisir.json","stats.json","bounds.json"].map(J));
+  STATS = stats;
+  map.addSource("dem",{type:"raster-dem",encoding:"terrarium",tileSize:256,maxzoom:12,
+    tiles:["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"],attribution:"AWS Terrain Tiles"});
+  map.setTerrain({source:"dem",exaggeration:1.8});
+  map.addLayer({id:"hill",type:"hillshade",source:"dem",paint:{"hillshade-exaggeration":0.45,"hillshade-shadow-color":"#3b3326"}});
+  const add = (id,data) => map.addSource(id,{type:"geojson",data});
+  add("lulc",lulc); add("change",change); add("admin",admin); add("label",label); add("kpi",kpi); add("mangrove",mang);
+  add("f1",f1); add("f2",f2); add("f3",f3); add("s_bau",bau); add("s_lp2b",lp2b); add("s_pesisir",pes);
+
+  const m = ["match",["get","Klass"]]; Object.entries(PAL).forEach(([k,v])=>m.push(k,v)); m.push("#bbb");
+  map.addLayer({id:"lulc",type:"fill",source:"lulc",filter:["!=",["get","Klass"],"Terbangun"],paint:{"fill-color":m,"fill-opacity":0.72}});
+  map.addLayer({id:"built",type:"fill-extrusion",source:"lulc",filter:["==",["get","Klass"],"Terbangun"],
+    paint:{"fill-extrusion-color":"#C8553D","fill-extrusion-height":120,"fill-extrusion-opacity":0.85}});
+  const c = ["match",["get","tipe"]]; Object.entries(CHG).forEach(([k,v])=>c.push(k,v)); c.push("#999");
+  map.addLayer({id:"change",type:"fill",source:"change",layout:{visibility:"none"},paint:{"fill-color":c,"fill-opacity":0.9}});
+  map.addLayer({id:"kpi",type:"fill",source:"kpi",layout:{visibility:"none"},paint:{"fill-color":"#4B3F9E","fill-opacity":0.28}});
+  map.addLayer({id:"kpi-line",type:"line",source:"kpi",layout:{visibility:"none"},paint:{"line-color":"#4B3F9E","line-width":1.4,"line-dasharray":[2,1]}});
+  [3,2,1].forEach(h=>map.addLayer({id:"f"+h,type:"fill",source:"f"+h,layout:{visibility:"none"},paint:{"fill-color":"#1FA3D6","fill-opacity":0.55}}));
+  map.addLayer({id:"mangrove",type:"fill",source:"mangrove",layout:{visibility:"none"},paint:{"fill-color":"#1E7F5C","fill-opacity":0.9}});
+  ["bau","lp2b","pesisir"].forEach(s=>map.addLayer({id:"s_"+s,type:"fill-extrusion",source:"s_"+s,layout:{visibility:"none"},
+    paint:{"fill-extrusion-color":["match",["get","asal"],"Sawah","#8E1B5A","#C77DA0"],"fill-extrusion-height":260,"fill-extrusion-opacity":0.95}}));
+  map.addLayer({id:"admin-fill",type:"fill",source:"admin",paint:{"fill-color":"#000","fill-opacity":0}});
+  map.addLayer({id:"admin",type:"line",source:"admin",paint:{"line-color":"#1B2433","line-width":1.6}});
+  map.addLayer({id:"label",type:"symbol",source:"label",layout:{"text-field":["upcase",["get","nama"]],"text-font":["Noto Sans Bold"],
+    "text-size":12,"text-letter-spacing":0.08},paint:{"text-color":"#1B2433","text-halo-color":"#f2ece1","text-halo-width":1.6}});
+
+  // kabupaten selector
+  const sel = document.getElementById("kabSel");
+  Object.keys(bounds).sort().forEach(k=>{const o=document.createElement("option");o.value=k;o.textContent=k;sel.appendChild(o);});
+  sel.onchange = () => sel.value ? map.fitBounds(bounds[sel.value],{padding:{left:innerWidth>760?420:20,top:40,right:40,bottom:innerWidth>760?40:300},pitch:55})
+                                 : map.flyTo({center:[108.15,-6.72],zoom:8.9,pitch:50,bearing:-10});
+
+  // popups
+  map.on("click","admin-fill",e=>{
+    const p=e.features[0].properties;
+    new maplibregl.Popup({maxWidth:"280px"}).setLngLat(e.lngLat).setHTML(`<div class="pop"><h3>${p.nama}</h3><table>
+      <tr><td>Luas wilayah</td><td>${fmt(+p.luas_ha)} ha</td></tr>
+      <tr><td>Permintaan terbangun 2030</td><td>${fmt(+p.demand_ha)} ha</td></tr>
+      <tr><td>Sawah hilang · BAU</td><td>${fmt(+p.bau_sawah)} ha</td></tr>
+      <tr><td>Sawah hilang · LP2B</td><td>${fmt(+p.lp2b_sawah)} ha</td></tr>
+      <tr><td>Sawah hilang · Pesisir</td><td>${fmt(+p.pesisir_sawah)} ha</td></tr></table></div>`).addTo(map);
+  });
+  const tip = new maplibregl.Popup({closeButton:false,closeOnClick:false,offset:8});
+  map.on("mousemove","lulc",e=>{map.getCanvas().style.cursor="pointer";tip.setLngLat(e.lngLat).setHTML(`<b>${e.features[0].properties.Klass}</b>`).addTo(map);});
+  map.on("mouseleave","lulc",()=>{map.getCanvas().style.cursor="";tip.remove();});
+
+  // toggles
+  document.querySelectorAll("input[data-l]").forEach(i=>i.onchange=()=>{
+    const ids = i.dataset.l==="kpi" ? ["kpi","kpi-line"] : [i.dataset.l];
+    ids.forEach(id=>map.setLayoutProperty(id,"visibility",i.checked?"visible":"none")); legend();
+  });
+  document.getElementById("terrainT").onchange = e => map.setTerrain(e.target.checked?{source:"dem",exaggeration:1.8}:null);
+  document.querySelectorAll("#floodSeg button").forEach(b=>b.onclick=()=>setFlood(+b.dataset.h));
+  document.querySelectorAll("#scnSeg button").forEach(b=>b.onclick=()=>setScn(b.dataset.s));
+  setScn(state.scn);
+});
+
+function setFlood(h){
+  state.flood=h;
+  [1,2,3].forEach(k=>map.setLayoutProperty("f"+k,"visibility",k===h?"visible":"none"));
+  document.querySelectorAll("#floodSeg button").forEach(b=>b.classList.toggle("on",+b.dataset.h===h));
+  document.getElementById("floodNote").textContent = h ? `±${rb(FLOOD[h])} wilayah daratan tergenang (model bathtub, DEM ±30 m, ilustratif).`
+    : "Model bathtub terhubung laut, DEM ±30 m. Ilustratif.";
+  legend();
+}
+
+function setScn(s){
+  state.scn=s; history.replaceState(null,"","#scn="+s);
+  ["bau","lp2b","pesisir"].forEach(k=>map.setLayoutProperty("s_"+k,"visibility",k===s?"visible":"none"));
+  const isP = s==="pesisir";
+  map.setLayoutProperty("mangrove","visibility",isP?"visible":"none");
+  document.querySelector('input[data-l="mangrove"]').checked = isP;
+  if(isP && state.flood===0) setFlood(1);
+  if(s==="lp2b"||isP){map.setLayoutProperty("kpi","visibility","visible");map.setLayoutProperty("kpi-line","visibility","visible");document.querySelector('input[data-l="kpi"]').checked=true;}
+  document.querySelectorAll("#scnSeg button").forEach(b=>b.classList.toggle("on",b.dataset.s===s));
+  document.getElementById("scnDesc").textContent = SCN[s].desc;
+  const b = STATS.baseline_2022, x = STATS.skenario[s];
+  const cards = s==="base" ? [
+      [rb(b.terbangun_ha),"lahan terbangun 2022"],[rb(b.sawah_ha),"sawah 2022"],
+      [rb(b.kpi_ha),"KPI RTRW (5 kab/kota)"],[Math.round(b.kpi_sawah_ha/b.kpi_ha*100)+"%","KPI yang masih berupa sawah"]]
+    : [[rb(x.terbangun_baru_ha),"lahan terbangun baru"],[rb(x.sawah_hilang_ha),"sawah hilang"],
+       [rb(x.baru_di_kpi_ha),"pertumbuhan di dalam KPI"],[fmt(x.baru_di_genangan1m_ha)+" ha","baru di zona rob +1 m"]];
+  document.getElementById("cards").innerHTML = cards.map(([v,l])=>`<div class="card"><b>${v}</b><span>${l}</span></div>`).join("");
+  const keys=["bau","lp2b","pesisir"], max=Math.max(...keys.map(k=>STATS.skenario[k].sawah_hilang_ha));
+  document.getElementById("bars").innerHTML = keys.map(k=>`<div class="row ${k===s?"on":""}"><span>${SCN[k].label}</span>
+     <div class="track"><div class="fill" style="width:${STATS.skenario[k].sawah_hilang_ha/max*100}%"></div></div><span>${rb(STATS.skenario[k].sawah_hilang_ha)}</span></div>`).join("");
+  const pk = s==="base" ? null : STATS.per_kab[s];
+  document.getElementById("kabTable").innerHTML = pk ? `<tr><th>Kab/Kota</th><th>Terbangun baru</th><th>Sawah hilang</th></tr>` +
+     Object.entries(pk).sort((a,b)=>b[1].baru_ha-a[1].baru_ha).map(([n,v])=>`<tr><td>${n}</td><td>${fmt(v.baru_ha)} ha</td><td>${fmt(v.sawah_hilang_ha)} ha</td></tr>`).join("")
+     : `<tr><th>Kab/Kota</th><th>Permintaan 2030</th></tr>` + Object.entries(STATS.permintaan_per_kab_ha).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<tr><td>${n}</td><td>${fmt(v)} ha</td></tr>`).join("");
+  legend();
+}
+
+function legend(){
+  const vis = id => map.getLayer(id) && map.getLayoutProperty(id,"visibility")!=="none";
+  let h = "";
+  if(state.scn!=="base") h += `<b>Skenario ${SCN[state.scn].label}</b><div><span class="sw" style="background:#8E1B5A"></span>Terbangun baru di atas sawah</div><div><span class="sw" style="background:#C77DA0"></span>Terbangun baru non-sawah</div>`;
+  if(vis("built")) h += `<div><span class="sw" style="background:#C8553D"></span>Terbangun 2022</div>`;
+  if(vis("kpi")) h += `<div><span class="sw" style="background:#4B3F9E;opacity:.6"></span>KPI (RTRW)</div>`;
+  if(vis("mangrove")) h += `<div><span class="sw" style="background:#1E7F5C"></span>Kandidat sabuk mangrove</div>`;
+  if(state.flood) h += `<div><span class="sw" style="background:#1FA3D6"></span>Genangan +${state.flood} m</div>`;
+  if(vis("change")) h += `<b>Perubahan 2014–2022</b>` + Object.entries(CHG).map(([k,v])=>`<div><span class="sw" style="background:${v}"></span>${k}</div>`).join("");
+  if(vis("lulc")) h += `<b>Tutupan lahan 2022</b>` + Object.entries(PAL).filter(([k])=>!["Terbangun","Tanah Kosong"].includes(k)).map(([k,v])=>`<div><span class="sw" style="background:${v}"></span>${k}</div>`).join("");
+  const L=document.getElementById("legend");
+  L.innerHTML = `<span class="lh" id="lh">Legenda ${L.classList.contains("min")?"▸":"▾"}</span><div class="lb">${h}</div>`;
+  document.getElementById("lh").onclick = () => { L.classList.toggle("min"); legend(); };
+}
+
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.id==="tab-"+b.dataset.tab));
+});
+document.getElementById("toggle").onclick = e => { const p=document.getElementById("panel"); p.classList.toggle("min"); e.target.textContent = p.classList.contains("min")?"Buka":"Ciutkan"; };
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+"type": "FeatureCollection",
+"name": "admin_label",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"xy_coordinate_resolution": 0.0001,
+"features": [
+{ "type": "Feature", "properties": { "nama": "Kuningan", "luas_ha": 118921.0, "demand_ha": 1599, "bau_sawah": 1029, "lp2b_sawah": 64, "pesisir_sawah": 64 }, "geometry": { "type": "Point", "coordinates": [ 108.5539, -6.9871 ] } },
+{ "type": "Feature", "properties": { "nama": "Cirebon", "luas_ha": 107127.0, "demand_ha": 4791, "bau_sawah": 3822, "lp2b_sawah": 3671, "pesisir_sawah": 3953 }, "geometry": { "type": "Point", "coordinates": [ 108.4581, -6.7626 ] } },
+{ "type": "Feature", "properties": { "nama": "Indramayu", "luas_ha": 208788.0, "demand_ha": 567, "bau_sawah": 323, "lp2b_sawah": 323, "pesisir_sawah": 316 }, "geometry": { "type": "Point", "coordinates": [ 108.1799, -6.4491 ] } },
+{ "type": "Feature", "properties": { "nama": "Kota Cirebon", "luas_ha": 3990.0, "demand_ha": 386, "bau_sawah": 168, "lp2b_sawah": 0, "pesisir_sawah": 0 }, "geometry": { "type": "Point", "coordinates": [ 108.5557, -6.7437 ] } },
+{ "type": "Feature", "properties": { "nama": "Majalengka", "luas_ha": 134392.0, "demand_ha": 3072, "bau_sawah": 2377, "lp2b_sawah": 3, "pesisir_sawah": 3 }, "geometry": { "type": "Point", "coordinates": [ 108.2838, -6.8075 ] } },
+{ "type": "Feature", "properties": { "nama": "Subang", "luas_ha": 217418.0, "demand_ha": 1152, "bau_sawah": 1008, "lp2b_sawah": 1008, "pesisir_sawah": 1008 }, "geometry": { "type": "Point", "coordinates": [ 107.7346, -6.4985 ] } },
+{ "type": "Feature", "properties": { "nama": "Sumedang", "luas_ha": 156047.0, "demand_ha": 1510, "bau_sawah": 984, "lp2b_sawah": 0, "pesisir_sawah": 0 }, "geometry": { "type": "Point", "coordinates": [ 107.9581, -6.8105 ] } }
+]
+}
